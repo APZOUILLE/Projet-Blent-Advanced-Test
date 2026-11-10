@@ -4,13 +4,6 @@ Ce lab est conçu pour se faire en **3h30, en autonomie.** Le repo est
 auto-porté, chaque exercice a un critère de réussite vérifiable par une
 commande.
 
-Pré-requis :
-- Tests unitaires niveau 1,5
-- Python niveau 1,5
-- API REST niveau 1
-- Makefile niveau 1
-
----
 
 ## Ce que tu vas apprendre
 
