@@ -1,0 +1,67 @@
+[tool.poetry]
+name = "workshop-tests-python"
+version = "1.0.0"
+description = "Atelier 3h30 : tests decouples, doubles minimes, tests independants"
+authors = ["Atelier tests Python"]
+readme = "README.md"
+package-mode = true
+packages = [{ include = "shop", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115"
+# Base de fuseaux horaires : absente de Windows, indispensable pour
+# ZoneInfo("Europe/Paris"). Sur Linux et macOS, le systeme la fournit.
+tzdata = { version = "*", markers = "sys_platform == 'win32'" }
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3"
+pytest-cov = ">=5.0"
+pytest-randomly = "^3.15"
+freezegun = "^1.5"
+httpx = "^0.27"
+uvicorn = "^0.30"
+
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+# `pythonpath` lets the suite run straight from a clone, without an install.
+pythonpath = ["src", "."]
+testpaths = ["tests", "exercises"]
+# pytest-randomly shuffles by default with a fresh seed on every run. That would
+# make `make test` non-reproducible, so the plugin is switched OFF here and
+# switched back ON, with pinned seeds, by scripts/shuffle.sh.
+addopts = "-p no:randomly -q -r fEs"
+markers = [
+    "temporal: le scenario depend d'une regle horaire ou calendaire",
+]
+filterwarnings = ["error::DeprecationWarning:shop.*"]
+
+[tool.coverage.run]
+# La couverture porte sur l'implementation PILOTEE. Mesurer `src/shop` en entier
+# sous SHOP_IMPL=a ferait compter toute l'implementation B comme non couverte.
+# Ce sont des NOMS DE MODULES, pas des chemins de fichiers : un chemin serait
+# ignore en silence et le module disparaitrait du rapport sans un mot.
+source = [
+    "shop.impl_${SHOP_IMPL-a}",
+    "shop.deps",
+    "shop.errors",
+    "shop.pricing_flag",
+]
+# `shop/__init__.py` (aiguillage SHOP_IMPL) et `shop/ports.py` (des Protocol
+# executes a l'import) sont volontairement hors surface : ni l'un ni l'autre ne
+# porte de regle du contrat.
+
+[tool.coverage.report]
+# exclude_also ENRICHIT la liste par defaut ; exclude_lines la REMPLACERAIT,
+# et les "# pragma: no cover" deja poses dans le depot cesseraient d'agir.
+exclude_also = [
+    # La route de debug est hors contrat : exiger sa couverture pousserait le
+    # participant a violer la regle 3 du cadre.
+    'include_in_schema=False',
+    # L'interrupteur de "make sabotage" : une seule de ses deux branches
+    # est atteignable par processus.
+    'os\.environ\.get\("SHOP_BUG"\)',
+]

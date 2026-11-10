@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+dist/
+*.sqlite
+.vscode/
+.coverage
+.coverage.*
+coverage.json
